@@ -53,6 +53,7 @@ class PDFGenerator:
                     'path': slide_path,
                     'presentation_name': presentation['name'],
                     'presentation_path': presentation['path'],
+                    'text': presentation.get('text', ''),
                 })
 
         # Generate pages with 2 slides each
@@ -110,6 +111,9 @@ class PDFGenerator:
             # Add slides
             self._add_slides_with_info(c, page_slides, start_idx)
 
+            # Add invisible searchable text for slides on this page
+            self._add_hidden_text(c, page_slides)
+
             c.showPage()
 
     def _add_slides_with_info(self, c: canvas.Canvas, slides: List[Dict], start_idx: int):
@@ -162,6 +166,34 @@ class PDFGenerator:
 
             except Exception as e:
                 logger.error(f"Failed to add slide {slide_path}: {e}")
+
+    def _add_hidden_text(self, c: canvas.Canvas, slides: List[Dict]):
+        """Add invisible searchable text for Ctrl+F search.
+
+        Args:
+            c: ReportLab canvas
+            slides: List of slide dictionaries on this page
+        """
+        c.setFillColor(HexColor("#FFFFFF"))
+        c.setFont("Helvetica", 1)
+
+        # Collect unique texts (avoid duplicating if both slides are from the same presentation)
+        seen = set()
+        y_pos = 10
+        for slide_info in slides:
+            text = slide_info.get('text', '')
+            name = slide_info.get('presentation_name', '')
+            key = name
+            if key in seen or not text:
+                continue
+            seen.add(key)
+
+            searchable = f"FILE: {name} PATH: {slide_info.get('presentation_path', '')} CONTENT: {text}"
+            max_chars = 500
+            for i in range(0, len(searchable), max_chars):
+                chunk = searchable[i:i + max_chars]
+                c.drawString(10, y_pos, chunk)
+                y_pos += 2
 
     def _generate_presentation_pages(self, c: canvas.Canvas, presentation: Dict):
         """Generate pages for presentation (may span multiple pages).
