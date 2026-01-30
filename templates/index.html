@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slides Repository Catalog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            opacity: 0.8;
+        }
+
+        .search-bar {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        #search {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        #search:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .presentation {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .presentation:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .presentation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .presentation-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .presentation-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .slides-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .slide {
+            position: relative;
+            background: #f8f8f8;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 16 / 9;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .slide:hover {
+            transform: scale(1.05);
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: white;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #ddd;
+            margin-top: 2rem;
+        }
+
+        .error-badge {
+            display: inline-block;
+            background: #ff4444;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats {
+                gap: 1rem;
+            }
+
+            .slides-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 0.5rem;
+            }
+
+            .presentation {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Slides Repository Catalog</h1>
+            <div class="subtitle">{{ sharepoint_site }} / {{ root_folder }}</div>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-value">{{ total_presentations }}</span>
+                    <span class="stat-label">Presentations</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ total_slides }}</span>
+                    <span class="stat-label">Slides</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Updated: {{ generated_at }}</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="search-bar">
+        <input
+            type="text"
+            id="search"
+            placeholder="Search by name, path, or text content (multiple words supported)..."
+            autocomplete="off"
+        />
+    </div>
+
+    <div class="container">
+        <div id="presentations-container">
+            {% if presentations %}
+                {% for presentation in presentations %}
+                <div class="presentation" data-name="{{ presentation.name|lower }}" data-path="{{ presentation.path|lower }}" data-text="{{ presentation.text|lower }}">
+                    <div class="presentation-header">
+                        <div class="presentation-title">
+                            {{ presentation.name }}
+                            {% if presentation.error %}
+                                <span class="error-badge">Rendering Error</span>
+                            {% endif %}
+                        </div>
+                        <a href="{{ presentation.web_url }}" target="_blank" class="btn">
+                            Open in SharePoint
+                        </a>
+                    </div>
+                    <div class="presentation-meta">
+                        <div class="meta-item">
+                            <span>📁</span>
+                            <span>{{ presentation.path }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📅</span>
+                            <span>{{ presentation.modified[:10] }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📊</span>
+                            <span>{{ presentation.slide_count }} slides</span>
+                        </div>
+                    </div>
+                    {% if presentation.slides %}
+                    <div class="slides-grid">
+                        {% for slide in presentation.slides %}
+                        <div class="slide" onclick="openLightbox('{{ slide }}')">
+                            <img src="{{ slide }}" alt="Slide {{ loop.index }}" loading="lazy">
+                            <div class="slide-number">{{ loop.index }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-results">
+                    No presentations found in the specified folder.
+                </div>
+            {% endif %}
+        </div>
+
+        <div id="no-results" class="no-results" style="display: none;">
+            No presentations match your search.
+        </div>
+    </div>
+
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-close">&times;</div>
+        <div class="lightbox-content">
+            <img id="lightbox-img" src="" alt="Slide preview">
+        </div>
+    </div>
+
+    <footer>
+        Generated by <a href="https://github.com/yourusername/slides-repository-catalog" style="color: #667eea;">Slides Repository Catalog</a>
+    </footer>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('search');
+        const presentationsContainer = document.getElementById('presentations-container');
+        const noResults = document.getElementById('no-results');
+        const presentations = document.querySelectorAll('.presentation');
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+
+            // Split search term by spaces for multi-word search
+            const searchWords = searchTerm ? searchTerm.split(/\s+/) : [];
+
+            let visibleCount = 0;
+
+            presentations.forEach(presentation => {
+                const name = presentation.dataset.name || '';
+                const path = presentation.dataset.path || '';
+                const text = presentation.dataset.text || '';
+
+                // Combine all searchable fields
+                const searchableContent = `${name} ${path} ${text}`;
+
+                // Check if ALL search words are found in content
+                const matches = searchWords.length === 0 || searchWords.every(word =>
+                    searchableContent.includes(word)
+                );
+
+                if (matches) {
+                    presentation.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    presentation.style.display = 'none';
+                }
+            });
+
+            if (visibleCount === 0) {
+                presentationsContainer.style.display = 'none';
+                noResults.style.display = 'block';
+            } else {
+                presentationsContainer.style.display = 'block';
+                noResults.style.display = 'none';
+            }
+        });
+
+        // Lightbox functionality
+        function openLightbox(imageSrc) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = imageSrc;
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+        }
+
+        // Close lightbox on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+
+        // Prevent lightbox close when clicking on image
+        document.querySelector('.lightbox-content').addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    </script>
+</body>
+</html>
