@@ -177,16 +177,10 @@ class SlidesRenderer:
             # Extract text from presentation
             text_content = self.extract_text(pptx_path)
 
-            # Generate relative paths for HTML
-            relative_paths = [
-                f"assets/{presentation_id}/{Path(p).name}"
-                for p in slide_paths
-            ]
-
             return {
                 "success": True,
                 "slide_count": len(slide_paths),
-                "slides": relative_paths,
+                "slides": slide_paths,  # Full paths for PDF
                 "text": text_content,
                 "error": None,
             }

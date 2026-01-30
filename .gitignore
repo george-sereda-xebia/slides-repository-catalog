@@ -33,3 +33,7 @@ site/
 *.tmp
 temp/
 tmp/
+
+Reusable_Assets/*
+catalog.pdf
+temp_slides/*

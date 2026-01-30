@@ -1,30 +1,38 @@
 # Slides Repository Catalog
 
-Автоматический каталог презентаций из папки `Reusable_Assets/` с превью всех слайдов.
+PDF catalog generator for presentations in the `Reusable_Assets/` folder. Renders slide thumbnails and embeds hidden text for full-text search.
 
 ## Quick Start
 
 ```bash
-# Собрать каталог
 ./build.sh
-
-# Просмотреть каталог
-./view.sh
 ```
 
-Откроется каталог на http://localhost:8000
+Output: `catalog.pdf` with thumbnails of all slides.
 
-## Что делает
+## How It Works
 
-1. Сканирует `Reusable_Assets/` и все подпапки
-2. Находит все .pptx файлы
-3. Конвертирует каждый слайд в PNG (через LibreOffice)
-4. Генерирует HTML каталог с поиском и превью
+1. Scans `Reusable_Assets/` recursively for `.pptx` files
+2. Converts each slide to PNG via LibreOffice
+3. Extracts text content from presentations
+4. Generates a PDF with:
+   - Slide thumbnails (2 per page)
+   - File names and paths
+   - Hidden searchable text (Ctrl+F / Cmd+F)
 
-## Требования
+## Search
+
+The PDF contains invisible text layer for each presentation:
+- File name
+- File path
+- All text from slides
+
+Use **Ctrl+F** (Cmd+F on Mac) to search across all content.
+
+## Requirements
 
 - Python 3.11+
-- LibreOffice (для конвертации слайдов)
+- LibreOffice (for slide rendering)
 
 ```bash
 # macOS
@@ -34,50 +42,31 @@ brew install libreoffice
 sudo apt-get install libreoffice
 ```
 
-## Установка
+## Setup
 
 ```bash
-# Создать виртуальное окружение
 python3 -m venv venv
 source venv/bin/activate
-
-# Установить зависимости
 pip install -r requirements.txt
 ```
 
-## Структура проекта
+## Project Structure
 
 ```
 .
-├── Reusable_Assets/         # Папка с презентациями (источник)
-├── site/                    # Сгенерированный каталог (выход)
-│   ├── index.html          # Главная страница
-│   └── assets/             # Превью слайдов
-├── src/                     # Код генератора
-│   ├── build_catalog.py    # Главный скрипт
-│   ├── local_client.py     # Работа с локальными файлами
-│   └── slides_renderer.py  # Конвертация PPTX → PNG
-├── templates/
-│   └── index.html          # Шаблон каталога
-├── build.sh                # Скрипт сборки
-└── view.sh                 # Скрипт просмотра
+├── Reusable_Assets/         # Presentations folder
+├── catalog.pdf              # Generated PDF catalog
+├── src/
+│   ├── build_catalog.py     # Main build script
+│   ├── local_client.py      # File scanner
+│   ├── slides_renderer.py   # PPTX → PNG + text extraction
+│   └── pdf_generator.py     # PDF generator
+└── build.sh                 # Build script
 ```
 
-## Ручной запуск
+## Manual Run
 
 ```bash
 source venv/bin/activate
-export SOURCE_MODE=local
 python3 src/build_catalog.py
 ```
-
-## GitHub Actions
-
-Добавьте в GitHub Secrets:
-- `SOURCE_MODE=local`
-
-Workflow автоматически запустится по расписанию (каждый час, 6 AM - 8 PM UTC).
-
-## License
-
-MIT
