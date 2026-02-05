@@ -124,8 +124,8 @@ class PDFGenerator:
             slides: List of slide dictionaries (max 2)
             start_idx: Starting index for numbering
         """
-        slide_width = 400
-        slide_height = 300
+        slide_width = 480
+        slide_height = 270  # 16:9 aspect ratio
         margin_x = (self.page_width - slide_width) / 2
         start_y = self.page_height - 60
         spacing = 15
@@ -194,126 +194,6 @@ class PDFGenerator:
                 chunk = searchable[i:i + max_chars]
                 c.drawString(10, y_pos, chunk)
                 y_pos += 2
-
-    def _generate_presentation_pages(self, c: canvas.Canvas, presentation: Dict):
-        """Generate pages for presentation (may span multiple pages).
-
-        Args:
-            c: ReportLab canvas
-            presentation: Presentation metadata
-        """
-        slides = presentation.get('slides', [])
-        if not slides:
-            return
-
-        slides_per_page = 2  # 2 large slides per page
-        total_pages = (len(slides) + slides_per_page - 1) // slides_per_page
-
-        for page_idx in range(total_pages):
-            start_idx = page_idx * slides_per_page
-            end_idx = min(start_idx + slides_per_page, len(slides))
-            page_slides = slides[start_idx:end_idx]
-
-            # Header with presentation name
-            c.setFillColor(HexColor("#821C84"))  # Xebia purple
-            c.rect(0, self.page_height - 60, self.page_width, 60, fill=True, stroke=False)
-
-            c.setFillColor(HexColor("#FFFFFF"))
-            c.setFont("Helvetica-Bold", 16)
-            c.drawString(20, self.page_height - 35, presentation['name'][:70])
-
-            # Path and page info
-            c.setFont("Helvetica", 9)
-            page_info = f" (page {page_idx + 1}/{total_pages})" if total_pages > 1 else ""
-            c.drawString(20, self.page_height - 50, f"📁 {presentation['path']}{page_info}")
-
-            # Add large slide thumbnails (2-3 per page)
-            self._add_large_slide_thumbnails(c, page_slides, start_idx)
-
-            # Add invisible searchable text (only on first page)
-            if page_idx == 0:
-                self._add_searchable_text(c, presentation)
-
-            c.showPage()
-
-    def _add_large_slide_thumbnails(self, c: canvas.Canvas, slides: List[str], start_idx: int = 0):
-        """Add large slide thumbnails to page (2-3 per page).
-
-        Args:
-            c: ReportLab canvas
-            slides: List of slide image paths (2-3 slides)
-            start_idx: Starting index for slide numbering
-        """
-        # Large vertical layout - 2 slides per page
-        slide_width = 400  # Fits 2 per page
-        slide_height = 300  # 4:3 aspect ratio
-        margin_x = (self.page_width - slide_width) / 2  # Center horizontally
-        start_y = self.page_height - 80
-        spacing = 15
-
-        for idx, slide_path in enumerate(slides):
-            if not os.path.exists(slide_path):
-                logger.warning(f"Slide not found: {slide_path}")
-                continue
-
-            y = start_y - idx * (slide_height + spacing + 30)
-
-            try:
-                # Draw border (frame)
-                c.setStrokeColor(HexColor("#CCCCCC"))
-                c.setLineWidth(1)
-                c.rect(margin_x - 2, y - slide_height - 2, slide_width + 4, slide_height + 4,
-                       fill=False, stroke=True)
-
-                # Draw image
-                c.drawImage(
-                    slide_path,
-                    margin_x, y - slide_height,
-                    width=slide_width,
-                    height=slide_height,
-                    preserveAspectRatio=True
-                )
-
-                # Draw slide number
-                c.setFillColor(HexColor("#666666"))
-                c.setFont("Helvetica", 10)
-                c.drawString(margin_x, y - slide_height - 18, f"Slide {start_idx + idx + 1}")
-
-            except Exception as e:
-                logger.error(f"Failed to add thumbnail {slide_path}: {e}")
-
-    def _add_slide_thumbnails(self, c: canvas.Canvas, slides: List[str]):
-        """Legacy method - kept for compatibility."""
-        self._add_large_slide_thumbnails(c, slides)
-
-    def _add_searchable_text(self, c: canvas.Canvas, presentation: Dict):
-        """Add invisible searchable text to PDF.
-
-        Args:
-            c: ReportLab canvas
-            presentation: Presentation metadata
-        """
-        # Prepare searchable content
-        name = presentation.get('name', '')
-        path = presentation.get('path', '')
-        text_content = presentation.get('text', '')
-
-        # Combine all text
-        searchable_text = f"""
-        FILE: {name}
-        PATH: {path}
-        CONTENT: {text_content}
-        """.strip()
-
-        # Add as invisible white text at bottom of page
-        c.setFillColor(HexColor("#FFFFFF"))  # White (invisible)
-        c.setFont("Helvetica", 1)  # Tiny font
-
-        # Split text into lines to fit page
-        max_chars = 500
-        for i in range(0, len(searchable_text), max_chars):
-            chunk = searchable_text[i:i + max_chars]
-            c.drawString(10, 10 + (i // max_chars) * 2, chunk)
 
 
 def main():
