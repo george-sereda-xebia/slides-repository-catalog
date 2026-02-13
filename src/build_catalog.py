@@ -1,4 +1,4 @@
-"""Build PDF catalog from Reusable_Assets folder."""
+"""Build PDF catalog from input folder."""
 
 import os
 import sys
@@ -6,7 +6,7 @@ import logging
 import tempfile
 import shutil
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime
 
 from local_client import LocalClient
 from slides_renderer import SlidesRenderer
@@ -21,18 +21,14 @@ logger = logging.getLogger(__name__)
 
 
 def build_catalog(
-    assets_path: str = "Reusable_Assets",
-    output_pdf: str = "catalog.pdf",
-    test_mode: bool = False,
-    max_slides: int = 5
+    assets_path: str = "input",
+    output_pdf: str = "CATALOG.pdf",
 ):
     """Build PDF catalog from presentations.
 
     Args:
         assets_path: Path to folder with presentations
         output_pdf: Output PDF file path
-        test_mode: If True, process only first presentation with limited slides
-        max_slides: Maximum slides to include in test mode
     """
     logger.info("=" * 60)
     logger.info("Building PDF Catalog")
@@ -57,17 +53,11 @@ def build_catalog(
 
     # Process presentations
     presentations = []
-    total_slides_collected = 0
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
         for idx, file_info in enumerate(pptx_files, 1):
-            # Test mode: stop when we have enough slides
-            if test_mode and total_slides_collected >= max_slides:
-                logger.info(f"🧪 TEST MODE: Collected {total_slides_collected} slides, stopping")
-                break
-
             logger.info(f"[{idx}/{len(pptx_files)}] Processing: {file_info['name']}")
 
             try:
@@ -75,21 +65,21 @@ def build_catalog(
                 temp_pptx = temp_path / f"{file_info['id']}.pptx"
                 client.download_file(file_info['download_url'], str(temp_pptx))
 
-                # Render slides and extract text
+                # Convert to PDF and extract metadata
                 render_result = renderer.render_presentation(
                     str(temp_pptx), file_info['id']
                 )
 
-                # Combine metadata
-                slides = render_result["slides"]
-                total_slides_collected += len(slides)
+                if not render_result["success"]:
+                    logger.warning(f"Skipping {file_info['name']}: {render_result['error']}")
+                    continue
 
                 presentation = {
                     "id": file_info["id"],
                     "name": file_info["name"],
                     "path": file_info["full_path"],
-                    "slides": slides,
-                    "slide_count": len(slides),
+                    "pdf_path": render_result["pdf_path"],
+                    "slide_count": render_result["slide_count"],
                     "text": render_result.get("text", ""),
                 }
 
@@ -97,9 +87,14 @@ def build_catalog(
 
             except Exception as e:
                 logger.error(f"Failed to process {file_info['name']}: {e}")
+                continue
 
-    # Generate PDF
-    logger.info("Generating PDF...")
+    if not presentations:
+        logger.error("No presentations were successfully processed!")
+        sys.exit(1)
+
+    # Generate merged PDF catalog
+    logger.info("Generating PDF catalog...")
     pdf_path = pdf_gen.generate_catalog(presentations)
 
     # Cleanup temp slides
@@ -108,9 +103,11 @@ def build_catalog(
 
     # Summary
     elapsed = (datetime.now() - start_time).total_seconds()
+    total_slides = sum(p["slide_count"] for p in presentations)
     logger.info("=" * 60)
-    logger.info(f"✅ Build completed in {elapsed:.1f} seconds")
+    logger.info(f"Build completed in {elapsed:.1f} seconds")
     logger.info(f"Presentations: {len(presentations)}")
+    logger.info(f"Total slides: {total_slides}")
     logger.info(f"Output: {pdf_path}")
     logger.info("=" * 60)
 

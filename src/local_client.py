@@ -15,7 +15,7 @@ class LocalClient:
     """Client for local filesystem operations."""
 
     # Default local assets folder
-    DEFAULT_ASSETS_FOLDER = "Reusable_Assets"
+    DEFAULT_ASSETS_FOLDER = "input"
 
     def __init__(self, root_path: str = None):
         """Initialize local filesystem client.

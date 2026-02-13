@@ -35,5 +35,7 @@ temp/
 tmp/
 
 Reusable_Assets/*
+input/*
 catalog.pdf
+CATALOG.pdf
 temp_slides/*
