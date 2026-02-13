@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class PDFGenerator:
     """Generate PDF catalog by merging native presentation PDFs."""
 
-    def __init__(self, output_path: str = "catalog.pdf"):
+    def __init__(self, output_path: str = "CATALOG.pdf"):
         self.output_path = output_path
         # Defaults — overridden once we know the slide dimensions
         self.page_width, self.page_height = A4
